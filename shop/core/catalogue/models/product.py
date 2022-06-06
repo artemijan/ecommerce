@@ -7,9 +7,9 @@ __all__ = ["Product"]
 
 class Product(AbstractAuditableModelMixin, models.Model):
     name = models.CharField(_("Product name"), max_length=255, null=False, blank=False)
-    image = models.ImageField(_("Product image"), null=True)
+    image = models.ImageField(_("Product image"), null=True, blank=True)
     description = models.TextField(_("Product description"), null=True, blank=True)
-    upc = models.CharField(_("Product upc"), max_length=255, null=False, blank=False)
+    upc = models.CharField(_("Product upc"), max_length=255, null=False, blank=False, unique=True)
     contains_hazmat = models.BooleanField(
         _("Product contains hazardous materials"), default=False
     )
@@ -20,6 +20,8 @@ class Product(AbstractAuditableModelMixin, models.Model):
         "self",
         verbose_name=_("Parent product"),
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name="children",
     )
     product_type = models.ForeignKey(
@@ -41,3 +43,6 @@ class Product(AbstractAuditableModelMixin, models.Model):
             "This flag indicates if this product can be used in an offer or not"
         ),
     )
+
+    def __str__(self):
+        return f"Product (id:{self.pk}): {self.name}"

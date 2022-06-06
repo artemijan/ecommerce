@@ -9,9 +9,9 @@ __all__ = ["ProductType"]
 class ProductType(AbstractAuditableModelMixin, models.Model):
     """
     Used for defining options and attributes for a subset of products.
-    E.g. Books, DVDs and Toys. A product can only belong to one product class.
+    E.g. Books, DVDs and Toys. A product can only belong to one product type.
 
-    At least one product class must be created when setting up a new
+    At least one product type must be created when setting up a new
     Oscar deployment.
 
     Not necessarily equivalent to top-level categories but usually will be.
@@ -31,8 +31,8 @@ class ProductType(AbstractAuditableModelMixin, models.Model):
     class Meta:
         app_label = "catalogue"
         ordering = ["name"]
-        verbose_name = _("Product class")
-        verbose_name_plural = _("Product classes")
+        verbose_name = _("Product type")
+        verbose_name_plural = _("Product types")
 
     def __str__(self):
         return self.name
