@@ -172,18 +172,17 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
     def __str__(self):
         return self.summary()
 
-    def _get_value(self):
+    @property
+    def value(self):
         value = getattr(self, f"value_{self.attribute.type}")
         if hasattr(value, "all"):
             value = value.all()
         return value
 
-    def _set_value(self, new_value):
+    @value.setter
+    def value(self, new_value):
         attr_name = f"value_{self.attribute.type}"
         setattr(self, attr_name, new_value)
-        return
-
-    value = property(_get_value, _set_value)
 
     def summary(self):
         """
