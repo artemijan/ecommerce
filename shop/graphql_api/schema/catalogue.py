@@ -33,7 +33,7 @@ class ProductScheme(DjangoObjectType):
         model = Product
 
     @staticmethod
-    def resolve_attribute_values(product: Product, info: ResolveInfo):
+    def resolve_attribute_values(product: Product, _info: ResolveInfo):
         return product.attribute_values.all()
 
 
