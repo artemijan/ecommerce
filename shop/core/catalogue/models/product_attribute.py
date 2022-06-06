@@ -1,8 +1,5 @@
 from datetime import date, datetime
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.files import File
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.html import strip_tags
