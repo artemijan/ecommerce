@@ -1,9 +1,23 @@
 import graphene
 from graphene_django import DjangoObjectType
+from graphql import ResolveInfo
 
-from core.catalogue.models import Product, ProductType
+from core.catalogue.models import Product, ProductAttributeValue, ProductType
 
 __all__ = ["Query"]
+
+
+class ProductAttributeValueScheme(graphene.ObjectType):
+    attribute = graphene.String(required=False)
+    value = graphene.String(required=False)
+
+    @staticmethod
+    def resolve_attribute(attr_val: ProductAttributeValue, _info: ResolveInfo):
+        return attr_val.attribute.code
+
+    @staticmethod
+    def resolve_value(attr_val: ProductAttributeValue, _info: ResolveInfo):
+        return str(attr_val.value)
 
 
 class ProductTypeScheme(DjangoObjectType):
@@ -13,9 +27,14 @@ class ProductTypeScheme(DjangoObjectType):
 
 class ProductScheme(DjangoObjectType):
     product_type = graphene.Field(ProductTypeScheme)
+    attribute_values = graphene.List(ProductAttributeValueScheme)
 
     class Meta:
         model = Product
+
+    @staticmethod
+    def resolve_attribute_values(product: Product, info: ResolveInfo):
+        return product.attribute_values.all()
 
 
 class Query(graphene.ObjectType):
