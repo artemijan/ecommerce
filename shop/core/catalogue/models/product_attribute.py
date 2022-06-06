@@ -88,49 +88,15 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
         try:
             value_obj = product.attribute_values.get(attribute=self)
         except ProductAttributeValue.DoesNotExist:
-            # FileField uses False for announcing deletion of the file
-            # not creating a new value
-            delete_file = self.is_file and value is False
-            if value is None or value == "" or delete_file:
-                return
             value_obj = ProductAttributeValue.objects.create(
                 product=product, attribute=self
             )
-
-        if self.is_file:
-            # File fields in Django are treated differently, see
-            # django.db.models.fields.FileField and method save_form_data
-            if value is None:
-                # No change
-                return
-            elif value is False:
-                # Delete file
-                value_obj.delete()
-            else:
-                # New uploaded file
-                value_obj.value = value
-                value_obj.save()
-        elif self.is_multi_option:
-            # ManyToMany fields are handled separately
-            if value is None:
-                value_obj.delete()
-                return
-            try:
-                count = value.count()
-            except (AttributeError, TypeError):
-                count = len(value)
-            if count == 0:
-                value_obj.delete()
-            else:
-                value_obj.value = value
-                value_obj.save()
-        else:
-            if value is None or value == "":
-                value_obj.delete()
-                return
-            if value != value_obj.value:
-                value_obj.value = value
-                value_obj.save()
+        if value is None or value == "":
+            value_obj.delete()
+            return
+        if value != value_obj.value:
+            value_obj.value = value
+            value_obj.save()
 
     def validate_value(self, value):
         validator = getattr(self, f"_validate_{self.type}")
@@ -146,14 +112,14 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
     def _validate_float(self, value):
         try:
             float(value)
-        except ValueError:
-            raise ValidationError(_("Must be a float"))
+        except ValueError as ex:
+            raise ValidationError(_("Must be a float")) from ex
 
     def _validate_integer(self, value):
         try:
             int(value)
-        except ValueError:
-            raise ValidationError(_("Must be an integer"))
+        except ValueError as ex:
+            raise ValidationError(_("Must be an integer")) from ex
 
     def _validate_date(self, value):
         if not isinstance(value, (datetime, date)):
@@ -214,14 +180,6 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
 
     def _set_value(self, new_value):
         attr_name = f"value_{self.attribute.type}"
-
-        if self.attribute.is_option and isinstance(new_value, str):
-            # Need to look up instance of AttributeOption
-            new_value = self.attribute.option_group.options.get(option=new_value)
-        elif self.attribute.is_multi_option:
-            getattr(self, attr_name).set(new_value)
-            return
-
         setattr(self, attr_name, new_value)
         return
 
