@@ -6,47 +6,60 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('catalogue', '0001_initial'),
+        ("catalogue", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='productattribute',
-            name='option_group',
+            model_name="productattribute",
+            name="option_group",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='entity_content_type',
+            model_name="productattributevalue",
+            name="entity_content_type",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='entity_object_id',
+            model_name="productattributevalue",
+            name="entity_object_id",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='value_file',
+            model_name="productattributevalue",
+            name="value_file",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='value_image',
+            model_name="productattributevalue",
+            name="value_image",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='value_multi_option',
+            model_name="productattributevalue",
+            name="value_multi_option",
         ),
         migrations.RemoveField(
-            model_name='productattributevalue',
-            name='value_option',
+            model_name="productattributevalue",
+            name="value_option",
         ),
         migrations.AlterField(
-            model_name='productattribute',
-            name='type',
-            field=models.CharField(choices=[('text', 'Text'), ('integer', 'Integer'), ('boolean', 'True / False'), ('float', 'Float'), ('richtext', 'Rich Text'), ('date', 'Date'), ('datetime', 'Datetime')], default='text', max_length=20, verbose_name='Type'),
+            model_name="productattribute",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("text", "Text"),
+                    ("integer", "Integer"),
+                    ("boolean", "True / False"),
+                    ("float", "Float"),
+                    ("richtext", "Rich Text"),
+                    ("date", "Date"),
+                    ("datetime", "Datetime"),
+                ],
+                default="text",
+                max_length=20,
+                verbose_name="Type",
+            ),
         ),
         migrations.DeleteModel(
-            name='AttributeOption',
+            name="AttributeOption",
         ),
         migrations.DeleteModel(
-            name='AttributeOptionGroup',
+            name="AttributeOptionGroup",
         ),
     ]

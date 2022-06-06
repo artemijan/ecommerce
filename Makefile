@@ -3,3 +3,6 @@ install:
 
 pylint:
 	pylint --load-plugins pylint_django --django-settings-module=shop.settings shop/*
+
+black:
+	black shop/*
