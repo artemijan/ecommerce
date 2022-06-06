@@ -1,6 +1,5 @@
 psycopg2==2.9.3
 Django==4.0.5
-graphene-django
 pylint==2.14.0
 black==22.3.0
 pydantic==1.9.1
@@ -8,3 +7,5 @@ django-treebeard==4.5.1
 django-extensions==3.1.5
 Pillow==9.1.1
 pylint-django==2.5.3
+graphene==2.1.9
+-e git+https://github.com/artemijan/graphene-django.git@v2.15.1#egg=graphene-django
