@@ -6,3 +6,4 @@ black==22.3.0
 pydantic==1.9.1
 django-treebeard==4.5.1
 django-extensions==3.1.5
+Pillow==9.1.1
