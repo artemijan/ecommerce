@@ -4,4 +4,4 @@ This project is about shopping cart app.
 
 ## Models:
 
-- [catalogue](https://github.com/artemijan/{{ repository.name }}/tree/master/shop/core/catalogue/models)
+- [catalogue](https://github.com/artemijan/ecommerce/tree/master/shop/core/catalogue/models)
