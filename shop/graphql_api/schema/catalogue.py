@@ -23,10 +23,14 @@ class Query(graphene.ObjectType):
     all_product_types = graphene.List(ProductTypeScheme)
 
     @staticmethod
-    def resolve_all_products(root, info):
+    def resolve_all_products(_root, _info):
         # We can easily optimize query count in the resolve method
-        return Product.objects.select_related("parent", "product_type").prefetch_related('attribute_values').all()
+        return (
+            Product.objects.select_related("parent", "product_type")
+            .prefetch_related("attribute_values")
+            .all()
+        )
 
     @staticmethod
-    def resolve_all_product_types(root, info):
+    def resolve_all_product_types(_root, _info):
         return ProductType.objects.all()

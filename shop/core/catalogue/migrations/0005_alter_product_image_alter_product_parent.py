@@ -7,18 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('catalogue', '0004_alter_product_upc'),
+        ("catalogue", "0004_alter_product_upc"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='product',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to='', verbose_name='Product image'),
+            model_name="product",
+            name="image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="", verbose_name="Product image"
+            ),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='parent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='catalogue.product', verbose_name='Parent product'),
+            model_name="product",
+            name="parent",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="children",
+                to="catalogue.product",
+                verbose_name="Parent product",
+            ),
         ),
     ]

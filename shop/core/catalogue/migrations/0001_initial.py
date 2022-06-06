@@ -229,7 +229,7 @@ class Migration(migrations.Migration):
                         validators=[
                             django.core.validators.RegexValidator(
                                 message="Code can only contain the letters a-z, A-Z, "
-                                        "digits, and underscores, and can't start with a digit.",
+                                "digits, and underscores, and can't start with a digit.",
                                 regex="^[a-zA-Z_][0-9a-zA-Z_]*$",
                             ),
                             core.common.validators.non_python_keyword,

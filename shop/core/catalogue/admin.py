@@ -1,7 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from core.catalogue.models import Product, ProductAttribute, ProductAttributeValue, ProductType
+from core.catalogue.models import (
+    Product,
+    ProductAttribute,
+    ProductAttributeValue,
+    ProductType,
+)
 
 
 class AttributeValueInline(admin.TabularInline):
@@ -13,11 +18,15 @@ class ProductAttributeInline(admin.TabularInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [AttributeValueInline, ]
+    inlines = [
+        AttributeValueInline,
+    ]
 
 
 class ProductTypeAdmin(admin.ModelAdmin):
-    inlines = [ProductAttributeInline, ]
+    inlines = [
+        ProductAttributeInline,
+    ]
 
 
 admin.site.register(Product, ProductAdmin)

@@ -9,7 +9,9 @@ class Product(AbstractAuditableModelMixin, models.Model):
     name = models.CharField(_("Product name"), max_length=255, null=False, blank=False)
     image = models.ImageField(_("Product image"), null=True, blank=True)
     description = models.TextField(_("Product description"), null=True, blank=True)
-    upc = models.CharField(_("Product upc"), max_length=255, null=False, blank=False, unique=True)
+    upc = models.CharField(
+        _("Product upc"), max_length=255, null=False, blank=False, unique=True
+    )
     contains_hazmat = models.BooleanField(
         _("Product contains hazardous materials"), default=False
     )
