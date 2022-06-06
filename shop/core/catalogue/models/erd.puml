@@ -1,0 +1,55 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+package catalogue{
+    class Product{
+        id: pk
+        parent: self
+        product_type: ProductType
+        ...
+    }
+    class ProductAttribute{
+        product_type: ProductType
+        code: str
+        name: str
+        type: Enum<str>
+        option_group: AttributeOptionGroup
+    }
+    class ProductAttributeValue{
+        attribute: ProductAttribute
+        product: Product
+        value_text: str
+        value_richtext: text
+        value_integer: int
+        value_boolean: bool
+        value_float: float
+        value_date: date
+        value_datetime: datetime
+    }
+    class ProductType{
+        name: str
+        requires_shipping: bool
+        track_stock: bool
+        ...
+    }
+    class Category{
+        name: str
+        parent: self
+        ...
+    }
+    class ProductCategory{
+        product: Product
+        category: Category
+    }
+
+    Product::product_type "*"--"1" ProductType
+    ProductAttribute::product_type "*"--"*" ProductType
+    ProductAttributeValue::product "*"--"1" Product
+    ProductAttributeValue::attribute "*"--"1" ProductAttribute
+    ProductCategory::category "*" -left- "1" Category
+    ProductCategory::product "*" -right- "1" Product
+}
+
+
+@enduml

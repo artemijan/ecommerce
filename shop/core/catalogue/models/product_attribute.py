@@ -13,8 +13,6 @@ from core.common.validators import non_python_keyword
 
 __all__ = [
     "ProductAttribute",
-    "AttributeOptionGroup",
-    "AttributeOption",
     "ProductAttributeValue",
 ]
 
@@ -59,9 +57,6 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
     DATETIME = "datetime"
     OPTION = "option"
     MULTI_OPTION = "multi_option"
-    ENTITY = "entity"
-    FILE = "file"
-    IMAGE = "image"
     TYPE_CHOICES = (
         (TEXT, _("Text")),
         (INTEGER, _("Integer")),
@@ -70,11 +65,6 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
         (RICHTEXT, _("Rich Text")),
         (DATE, _("Date")),
         (DATETIME, ("Datetime")),
-        (OPTION, _("Option")),
-        (MULTI_OPTION, _("Multi Option")),
-        (ENTITY, _("Entity")),
-        (FILE, _("File")),
-        (IMAGE, _("Image")),
     )
     type = models.CharField(
         choices=TYPE_CHOICES,
@@ -83,14 +73,6 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
         verbose_name=_("Type"),
     )
 
-    option_group = models.ForeignKey(
-        "catalogue.AttributeOptionGroup",
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        verbose_name=_("Option Group"),
-        help_text=_('Select an option group if using type "Option" or "Multi Option"'),
-    )
     required = models.BooleanField(_("Required"), default=False)
 
     class Meta:
@@ -101,18 +83,6 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
 
     def __str__(self):
         return self.name
-
-    @property
-    def is_option(self):
-        return self.type == self.OPTION
-
-    @property
-    def is_multi_option(self):
-        return self.type == self.MULTI_OPTION
-
-    @property
-    def is_file(self):
-        return self.type in [self.FILE, self.IMAGE]
 
     def save_value(self, product, value):  # noqa: C901 too complex
         try:
@@ -197,42 +167,6 @@ class ProductAttribute(AbstractAuditableModelMixin, models.Model):
         if not isinstance(value, bool):
             raise ValidationError(_("Must be a boolean"))
 
-    def _validate_entity(self, value):
-        if not isinstance(value, models.Model):
-            raise ValidationError(_("Must be a model instance"))
-
-    def _validate_multi_option(self, value):
-        try:
-            values = iter(value)
-        except TypeError as ex:
-            raise ValidationError(
-                _("Must be a list or AttributeOption queryset")
-            ) from ex
-        # Validate each value as if it were an option
-        # Pass in valid_values so that the DB isn't hit multiple times per iteration
-        valid_values = self.option_group.options.values_list("option", flat=True)
-        for val in values:
-            self._validate_option(val, valid_values=valid_values)
-
-    def _validate_option(self, value, valid_values=None):
-        if not isinstance(value, AttributeOption):
-            raise ValidationError(_("Must be an AttributeOption model object instance"))
-        if not value.pk:
-            raise ValidationError(_("AttributeOption has not been saved yet"))
-        if valid_values is None:
-            valid_values = self.option_group.options.values_list("option", flat=True)
-        if value.option not in valid_values:
-            raise ValidationError(
-                _("%(enum)s is not a valid choice for %(attr)s")
-                % {"enum": value, "attr": self}
-            )
-
-    def _validate_file(self, value):
-        if value and not isinstance(value, File):
-            raise ValidationError(_("Must be a file field"))
-
-    _validate_image = _validate_file
-
 
 class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
     """
@@ -262,29 +196,15 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
     value_richtext = models.TextField(_("Richtext"), blank=True, null=True)
     value_date = models.DateField(_("Date"), blank=True, null=True)
     value_datetime = models.DateTimeField(_("DateTime"), blank=True, null=True)
-    value_multi_option = models.ManyToManyField(
-        "catalogue.AttributeOption",
-        blank=True,
-        related_name="multi_valued_attribute_values",
-        verbose_name=_("Value multi option"),
-    )
-    value_option = models.ForeignKey(
-        "catalogue.AttributeOption",
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        verbose_name=_("Value option"),
-    )
-    value_file = models.FileField(max_length=255, blank=True, null=True)
-    value_image = models.ImageField(max_length=255, blank=True, null=True)
-    value_entity = GenericForeignKey("entity_content_type", "entity_object_id")
 
-    entity_content_type = models.ForeignKey(
-        ContentType, blank=True, editable=False, on_delete=models.CASCADE, null=True
-    )
-    entity_object_id = models.PositiveIntegerField(
-        null=True, blank=True, editable=False
-    )
+    class Meta:
+        app_label = "catalogue"
+        unique_together = ("attribute", "product")
+        verbose_name = _("Product attribute value")
+        verbose_name_plural = _("Product attribute values")
+
+    def __str__(self):
+        return self.summary()
 
     def _get_value(self):
         value = getattr(self, f"value_{self.attribute.type}")
@@ -307,15 +227,6 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
 
     value = property(_get_value, _set_value)
 
-    class Meta:
-        app_label = "catalogue"
-        unique_together = ("attribute", "product")
-        verbose_name = _("Product attribute value")
-        verbose_name_plural = _("Product attribute values")
-
-    def __str__(self):
-        return self.summary()
-
     def summary(self):
         """
         Gets a string representation of both the attribute and it's value,
@@ -334,20 +245,8 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
         return getattr(self, property_name, self.value)
 
     @property
-    def _multi_option_as_text(self):
-        return ", ".join(str(option) for option in self.value_multi_option.all())
-
-    @property
     def _richtext_as_text(self):
         return strip_tags(self.value)
-
-    @property
-    def _entity_as_text(self):
-        """
-        Returns the unicode representation of the related model. You likely
-        want to customise this (and maybe _entity_as_html) if you use entities.
-        """
-        return str(self.value)
 
     @property
     def value_as_html(self):
@@ -362,51 +261,3 @@ class ProductAttributeValue(AbstractAuditableModelMixin, models.Model):
     @property
     def _richtext_as_html(self):
         return mark_safe(self.value)
-
-
-class AttributeOptionGroup(AbstractAuditableModelMixin, models.Model):
-    """
-    Defines a group of options that collectively may be used as an
-    attribute type
-
-    For example, Language
-    """
-
-    name = models.CharField(_("Name"), max_length=128)
-
-    class Meta:
-        app_label = "catalogue"
-        verbose_name = _("Attribute option group")
-        verbose_name_plural = _("Attribute option groups")
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def option_summary(self):
-        options = [o.option for o in self.options.all()]
-        return ", ".join(options)
-
-
-class AttributeOption(AbstractAuditableModelMixin, models.Model):
-    """
-    Provides an option within an option group for an attribute type
-    Examples: In a Language group, English, Greek, French
-    """
-
-    group = models.ForeignKey(
-        "catalogue.AttributeOptionGroup",
-        on_delete=models.CASCADE,
-        related_name="options",
-        verbose_name=_("Group"),
-    )
-    option = models.CharField(_("Option"), max_length=255)
-
-    class Meta:
-        app_label = "catalogue"
-        unique_together = ("group", "option")
-        verbose_name = _("Attribute option")
-        verbose_name_plural = _("Attribute options")
-
-    def __str__(self):
-        return self.option

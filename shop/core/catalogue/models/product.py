@@ -14,6 +14,9 @@ class Product(AbstractAuditableModelMixin, models.Model):
     contains_hazmat = models.BooleanField(
         _("Product contains hazardous materials"), default=False
     )
+    """
+    For this purpose we can use MP_Node, but in our case we expect to have up to 2 children
+    """
     parent = models.ForeignKey(
         "self",
         verbose_name=_("Parent product"),
